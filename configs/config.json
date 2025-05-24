@@ -1,0 +1,119 @@
+{
+  "abide": {
+    "name": "abide",
+    "atlas": "cc200",
+    "save_results": 0,
+    "K": 8,
+    "baseline": 0,
+    "num_folds": 5,
+    "data_root": "/home/hjc/Codebase/Database/ABIDE/abide200/",
+    "device": "cuda",
+    "N": 200,
+    "precision": 4,
+    "length": 100,
+    "loss": "sum",
+    "clustering_threshold": 0.5,
+    "seed": 2025,
+
+    "s2cg": {
+      "hidden_dim": [256,32,64],
+      "cutoff": 25,
+      "threshold": 0,
+      "lr": 1e-4,
+      "save_results": 0,
+      "epoch": 240,
+      "reg_loss": 2000,
+      "rql_loss": 30,
+      "batch_size": 64
+    },
+
+    "model": {
+      "epoch": 200,
+      "batch_size": 16,
+      "lr": 3e-4,
+      "order": 1,
+      "hidden_dim": 48,
+      "out_dim": "None",
+      "mid_dim": 16,
+      "num_classes": 2,
+      "loss": 1
+    }
+
+  },
+
+
+  "hcp": {
+    "name": "hcp",
+    "atlas": 22,
+    "N": 22,
+    "K": 8,
+    "num_folds": 5,
+    "length": 1000,
+    "loss": "sum",
+    "device": "cuda",
+    "data_root": "/home/hjc/Codebase/Database/HCP/",
+    "clustering_threshold": 0.5,
+
+    "s2cg": {
+      "hidden_dim": [256,32,64],
+      "cutoff": 256,
+      "threshold": 0,
+      "lr": 1e-4,
+      "save_results": 0,
+      "epoch": 200,
+      "reg_loss": 2000,
+      "rql_loss": 30,
+      "batch_size": 64
+    },
+
+    "model": {
+      "epoch": 200,
+      "batch_size": 512,
+      "lr": 1e-4,
+      "order": 1,
+      "hidden_dim": 128,
+      "out_dim": "None",
+      "mid_dim": 512,
+      "num_classes": 2,
+      "loss": 1
+    }
+  },
+
+
+  "adhd": {
+    "name": "adhd",
+    "atlas": "aal116",
+    "N": 116,
+    "K": 8,
+    "num_folds": 5,
+    "length": 70,
+    "loss": "sum",
+    "device": "cuda",
+    "data_root": "/home/hjc/Codebase/Database/code/preprocessed_adhd/",
+    "clustering_threshold": 0,
+
+    "s2cg": {
+      "hidden_dim": [256,32,64],
+      "cutoff": 30,
+      "threshold": 0,
+      "lr": 1e-4,
+      "save_results": 0,
+      "epoch": 200,
+      "reg_loss": 2000,
+      "rql_loss": 0.1,
+      "batch_size": 64
+    },
+
+    "model": {
+      "epoch": 200,
+      "batch_size": 64,
+      "lr": 1e-4,
+      "order": 1,
+      "hidden_dim": 32,
+      "out_dim": "None",
+      "mid_dim": 32,
+      "num_classes": 2,
+      "loss": 1
+    }
+  }
+}
