@@ -91,6 +91,7 @@
     "device": "cuda",
     "data_root": "/home/hjc/Codebase/Database/code/preprocessed_adhd/",
     "clustering_threshold": 0,
+    "size": 937,
 
     "s2cg": {
       "hidden_dim": [256,32,64],

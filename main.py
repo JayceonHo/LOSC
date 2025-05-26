@@ -1,5 +1,4 @@
 import random
-
 import numpy as np
 import argparse
 import json
@@ -125,7 +124,6 @@ if __name__ == '__main__':
                                                    np.zeros(config["num_folds"]), np.zeros(config["num_folds"]))
     gt_cluster = np.load(config["data_root"] + "gt_clusters.npy")
     delete_folder(f"./log/{args.dataset}_{config["atlas"]}_log/")
-    # set_seed(config["seed"])
     for f in range(config["num_folds"]):
         writer = SummaryWriter(f"./log/{args.dataset}_{config["atlas"]}_log/{f}")
         if args.dataset == "abide":
@@ -138,15 +136,8 @@ if __name__ == '__main__':
             train_dataset = HCP(config, f+1)
             test_dataset = HCP(config, f+1, "test")
         elif args.dataset == "adhd":
-            # if f==0:
-            #     test_split = random.sample(list(range(937)), 100)
-            #     train_split = list(set(list(range(937))) - set(test_split))
-            #     np.save("train_index.npy", train_split)
-            #     np.save("test_index.npy", test_split)
-            # else:
-            #     train_split, test_split = np.load("train_index.npy"), np.load("test_index.npy")
             labels = np.load(config["data_root"] + "final_label.npy")
-            cv_split = get_cv_index(937, labels, config["num_folds"])
+            cv_split = get_cv_index(config["size"], labels, config["num_folds"])
             train_dataset = ADHD200(config, None, cv_split[f][0])
             test_dataset = ADHD200(config, None, cv_split[f][2])
         if args.train_s2cg and f==0:
