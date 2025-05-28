@@ -91,7 +91,6 @@ def cal_small_world_coefficient(adj_matrix, n_random=20, seed=None):
     # threshold = np.percentile(adj_matrix[adj_matrix>0], 90)
 
     # adj_matrix = (adj_matrix>=threshold).astype(int)
-    print("here: ", np.min(adj_matrix), np.max(adj_matrix))
     # adj_matrix[adj_matrix < 0] = 0
     adj_matrix = (adj_matrix - np.min(adj_matrix)) / (np.max(adj_matrix) - np.min(adj_matrix))
 
