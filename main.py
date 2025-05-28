@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 from sklearn.cluster import SpectralClustering
 from utilis.loss import batch_rayleigh_quotient_loss
 from utilis.dataset import ABIDE, HCP, ADHD200
-from utilis.metric import cal_metrics, evaluate_cluster_performance
+from utilis.metric import cal_metrics, evaluate_cluster_performance, cal_small_world_coefficient
 from utilis.tools import *
 from utilis.plot import draw_cluster, draw_adhd_cluster
 
@@ -61,6 +61,15 @@ class TrainS2CG:
             draw_cluster(clustering_label, gt_label, config["N"], config["K"])
         print(f"fco {fco}, ci {ci}, purity {p_sco} , nmi: {nmi}, homo: {homogeneity}")
 
+        swe = cal_small_world_coefficient(sim_mat.mean(0))
+        swe_pc = cal_small_world_coefficient(train_dataset.feature_matrix.cpu().numpy().mean(0))
+        if args.dataset == "hcp":
+            swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy())
+        else:
+            swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy().mean(0))
+        print(f"our small-worldness {swe}, pc small-worldness {swe_pc}, pcc small-worldness {swe_pcc}")
+
+
 class TrainModel:
     def __init__(self):
         self.num_epoch = config["model"]["epoch"]
@@ -74,7 +83,7 @@ class TrainModel:
         self.train()
         self.model.load_state_dict(torch.load(f"./data/{args.dataset}/{f}_fold_best_model.pth"))
         test_result = self.evaluate()
-        print(test_result)
+        print(f, test_result)
         accuracy[f] = test_result[0]
         auc_roc[f] = test_result[1]
         sensitivity[f] = test_result[2]

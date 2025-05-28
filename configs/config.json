@@ -14,16 +14,17 @@
     "loss": "sum",
     "clustering_threshold": 0.5,
     "seed": 2025,
+    "size": 1009,
 
     "s2cg": {
       "hidden_dim": [256,32,64],
       "cutoff": 25,
       "threshold": 0,
-      "lr": 1e-4,
+      "lr": 1e-3,
       "save_results": 0,
-      "epoch": 240,
+      "epoch": 100,
       "reg_loss": 2000,
-      "rql_loss": 30,
+      "rql_loss": 0.001,
       "batch_size": 64
     },
 
@@ -60,9 +61,9 @@
       "threshold": 0,
       "lr": 1e-4,
       "save_results": 0,
-      "epoch": 200,
+      "epoch": 50,
       "reg_loss": 2000,
-      "rql_loss": 30,
+      "rql_loss": 10,
       "batch_size": 64
     },
 
@@ -96,12 +97,12 @@
     "s2cg": {
       "hidden_dim": [256,32,64],
       "cutoff": 30,
-      "threshold": 0,
+      "threshold": -1,
       "lr": 1e-4,
       "save_results": 0,
-      "epoch": 200,
+      "epoch": 100,
       "reg_loss": 2000,
-      "rql_loss": 0.1,
+      "rql_loss": 30,
       "batch_size": 64
     },
 

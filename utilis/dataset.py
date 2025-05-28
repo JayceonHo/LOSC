@@ -41,8 +41,9 @@ class ADHD200(torch.utils.data.Dataset):
     def __init__(self, config, site, split):
         super().__init__()
         self.root = config["data_root"]
-        feat, ts, label, adj = (np.load(self.root + "final_matrix.npy"), np.load(self.root+"final_ts.npy"),
-                                np.load(self.root+"final_label.npy"), np.load(self.root+"final_matrix.npy"))
+        feat, ts, label = (np.load(self.root + "final_matrix.npy"), np.load(self.root+"final_ts.npy"),
+                                np.load(self.root+"final_label.npy"))
+        adj = get_network(ts, "partial correlation")
         label[label>1]=1
         feat, ts, label, adj = feat[split], ts[split].transpose(0,2,1), label[split], adj[split]
         site_list = np.load(self.root+"site_list.npy")[split]
