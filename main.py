@@ -149,7 +149,7 @@ if __name__ == '__main__':
             cv_split = get_cv_index(config["size"], labels, config["num_folds"])
             train_dataset = ADHD200(config, None, cv_split[f][0])
             test_dataset = ADHD200(config, None, cv_split[f][2])
-        if args.train_s2cg and f==0:
+        if args.train_s2cg and f==1:
             TrainS2CG()
         TrainModel()
         writer.close()

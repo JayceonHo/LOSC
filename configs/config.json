@@ -98,11 +98,11 @@
       "hidden_dim": [256,32,64],
       "cutoff": 30,
       "threshold": -1,
-      "lr": 1e-4,
+      "lr": 3e-4,
       "save_results": 0,
-      "epoch": 100,
+      "epoch": 50,
       "reg_loss": 2000,
-      "rql_loss": 30,
+      "rql_loss": 5,
       "batch_size": 64
     },
 
