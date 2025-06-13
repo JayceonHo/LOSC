@@ -116,7 +116,12 @@ class TrainModel:
         return acc, auc, sens, spec
 
 
-
+"""
+This is main file
+see configs for the set of basic parameters
+training-related hyper-parameters can be input in command line
+2025/06/12
+"""
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c','--config',default='configs/config.json', type=str)
