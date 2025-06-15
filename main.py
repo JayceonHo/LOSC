@@ -15,7 +15,15 @@ from utilis.dataset import ABIDE, HCP, ADHD200
 from utilis.metric import cal_metrics, evaluate_cluster_performance, cal_small_world_coefficient
 from utilis.tools import *
 from utilis.plot import draw_cluster, draw_adhd_cluster
-
+from baseline.models.BrainNetCNN import BrainNetCNN
+from baseline.models.gbt import GeometricBrainTransformer
+from baseline.models.RGTNet import GraphTransformer
+from baseline.models.PLSNet import PLSNet
+# from baseline.models.bnt import BrainNetworkTransformer
+# from baseline.models.newcomTF import ComBrainTF
+from baseline.models.MSSTAN import MSSTAN
+from baseline.models.dstanet import DSTANet
+from baseline.models.fbnetgen import FBNETGEN
 class TrainS2CG:
     def __init__(self):
         self.train_data_loader = DataLoader(train_dataset, batch_size=config["s2cg"]["batch_size"], shuffle=True)
@@ -74,10 +82,19 @@ class TrainModel:
     def __init__(self):
         self.num_epoch = config["model"]["epoch"]
         cluster_label = np.load(f"./data/{args.dataset}/cluster.npy")
+        device = "cuda"
         self.model = ClassificationModel(config, cluster_label)
+        # self.model = BrainNetworkTransformer(116, 116**2)
+        # self.model = FBNETGEN(70, 116, 116, 16, 10).to(device)
+        # self.model = GraphTransformer(roi_num=116, node_feature_dim=116,time_series=70).to(device)
+        # self.model = PLSNet(roi_num=116, node_feature_dim=116,time_series=70).to(device)
+        # self.model = CNN().to(device)
+        # self.model = GeometricBrainTransformer(node_sz=116,nhead=4, all_dim=116**2).to(device)
+        # self.model = DSTANet(num_class=2, num_frame=116, num_point=116)
+        # self.model = MSSTAN(node_num=116, graph_num=config["model"]["batch_size"]).to("cuda")
+        # self.model = BrainNetCNN(116)
         self.model.to(args.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=config["model"]["lr"])
-
         self.train_data_loader = DataLoader(train_dataset, batch_size=config["model"]["batch_size"], shuffle=True)
         self.test_data_loader = DataLoader(test_dataset, batch_size=config["model"]["batch_size"], shuffle=True)
         self.train()
@@ -95,6 +112,8 @@ class TrainModel:
             self.model.train()
             for idx, data in enumerate(self.train_data_loader):
                 pred = self.model(data[0], data[1], data[-1])[0]
+                # pred = self.model(data[0], data[0])
+                # pred = self.model(data[-1], data[0])
                 loss = config["model"]["loss"] * loss_func(pred, data[2])
                 train_correct += data[2].eq(torch.argmax(pred, dim=1)).sum().item()
                 loss.backward()
@@ -107,8 +126,12 @@ class TrainModel:
 
     def evaluate(self):
         self.model.eval()
+        rois_weights, cluster_weights = None, None
         with torch.no_grad():
             pred, rois_weights, cluster_weights =  self.model(test_dataset.feature_matrix.float(), test_dataset.time_series.float())
+            # pred = self.model(test_dataset.time_series.float(), test_dataset.feature_matrix.float())
+            # pred = self.model(test_dataset.feature_matrix.float(), test_dataset.feature_matrix.float())
+
         if args.save_result:
             np.save(f"./data/{args.dataset}/{f}_roi_weights.npy", rois_weights)
             np.save(f"./data/{args.dataset}/{f}_cluster_weights.npy", cluster_weights)
@@ -122,6 +145,8 @@ see configs for the set of basic parameters
 training-related hyper-parameters can be input in command line
 2025/06/12
 """
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c','--config',default='configs/config.json', type=str)
@@ -150,11 +175,9 @@ if __name__ == '__main__':
             train_dataset = HCP(config, f+1)
             test_dataset = HCP(config, f+1, "test")
         elif args.dataset == "adhd":
-            labels = np.load(config["data_root"] + "final_label.npy")
-            cv_split = get_cv_index(config["size"], labels, config["num_folds"])
-            train_dataset = ADHD200(config, None, cv_split[f][0])
-            test_dataset = ADHD200(config, None, cv_split[f][2])
-        if args.train_s2cg and f==1:
+            train_dataset = ADHD200(config, None, np.load("train_index.npy"))
+            test_dataset = ADHD200(config, None, np.load("test_index.npy"))
+        if args.train_s2cg and f==0:
             TrainS2CG()
         TrainModel()
         writer.close()

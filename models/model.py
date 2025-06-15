@@ -3,6 +3,18 @@ import torch.nn as nn
 import numpy as np
 from models.S2CG import S2CG
 from models.chebynet import ChebNet
+from nilearn import connectome
+
+
+
+def get_network(x, kind="correlation", multi_scale=1):
+    conn_measure = connectome.ConnectivityMeasure(kind=kind)
+    connectivity = conn_measure.fit_transform(x)
+    connectivity = np.arctanh(connectivity)
+    connectivity[connectivity == np.inf] = 0
+    connectivity[np.isnan(connectivity)] = 0
+    connectivity[connectivity<0] = 0
+    return connectivity
 
 class ClassificationModel(nn.Module):
     def __init__(self, config, cluster_label):
@@ -34,7 +46,7 @@ class ClassificationModel(nn.Module):
             nn.GELU(),
             nn.Linear(config["model"]["mid_dim"], config["model"]["num_classes"]),
         )
-
+        self.linear  = nn.Linear(200, 32)
         self.cluster_label = cluster_label
 
 
@@ -47,8 +59,13 @@ class ClassificationModel(nn.Module):
             intra_ts = time_series[:, self.cluster_label==i, :]
             with torch.no_grad():
                 intra_net = self.S2CG(intra_ts)[0]
+                # intra_net = get_network(intra_ts.transpose(1,2).detach().cpu().numpy())
+                # intra_net = torch.from_numpy(intra_net).float().to(feature.device)
+                # assert 1==2, print(intra_ts.shape, intra_net.shape)
             intra_feat = feature[:, self.cluster_label==i, :]
             intra_embed = self.intra_cluster_learner(intra_feat, intra_net)
+            # assert 1==2, print(intra_feat.shape)
+            # intra_embed = self.linear(intra_feat)
 
             weights = self.ARP[i](intra_embed.permute(0,2,1)) # BxCXM
             weights = torch.softmax(weights, dim=-1) # BxCxM
@@ -56,9 +73,10 @@ class ClassificationModel(nn.Module):
             mean_roi_embed = (intra_embed.permute(0,2,1) @  weights).squeeze(-1) # BxMxC @ Bx
             gating  = self.gating(intra_embed)
             mean_edge_embed = (gating * intra_embed).mean(1)
+            # assert 1==2, print(intra_embed.shape)
             intra_embed = mean_roi_embed + mean_edge_embed
             cluster_weights[i] = torch.mean(mean_edge_embed).detach().cpu().numpy()
-
+            # intra_embed = intra_embed.mean(1)
             if i == 0:
                 mean_intra_embed = intra_embed
                 all_weights = weights

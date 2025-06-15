@@ -20,20 +20,20 @@
       "hidden_dim": [256,32,64],
       "cutoff": 25,
       "threshold": 0,
-      "lr": 1e-3,
+      "lr": 1e-4,
       "save_results": 0,
-      "epoch": 100,
+      "epoch": 200,
       "reg_loss": 2000,
-      "rql_loss": 0.001,
+      "rql_loss": 50,
       "batch_size": 64
     },
 
     "model": {
       "epoch": 200,
       "batch_size": 16,
-      "lr": 3e-4,
+      "lr": 1e-4,
       "order": 1,
-      "hidden_dim": 48,
+      "hidden_dim": 32,
       "out_dim": "None",
       "mid_dim": 16,
       "num_classes": 2,
@@ -85,7 +85,7 @@
     "name": "adhd",
     "atlas": "aal116",
     "N": 116,
-    "K": 8,
+    "K":4,
     "num_folds": 5,
     "length": 70,
     "loss": "sum",
@@ -93,22 +93,24 @@
     "data_root": "/home/hjc/Codebase/Database/code/preprocessed_adhd/",
     "clustering_threshold": 0,
     "size": 937,
-
     "s2cg": {
-      "hidden_dim": [256,32,64],
+      "hidden_dim": [
+        256,
+        32,
+        64
+      ],
       "cutoff": 30,
-      "threshold": -1,
-      "lr": 3e-4,
+      "threshold": 0,
+      "lr": 1e-4,
       "save_results": 0,
-      "epoch": 50,
+      "epoch": 200,
       "reg_loss": 2000,
-      "rql_loss": 5,
+      "rql_loss": 0.1,
       "batch_size": 64
     },
-
     "model": {
-      "epoch": 200,
-      "batch_size": 64,
+      "epoch": 50,
+      "batch_size": 32,
       "lr": 1e-4,
       "order": 1,
       "hidden_dim": 32,

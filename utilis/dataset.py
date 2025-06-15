@@ -2,6 +2,13 @@ import torch
 import numpy as np
 from utilis.tools import get_network
 
+
+def normalize(x):
+    mean = np.mean(x, axis=0, keepdims=True)
+    std = np.std(x, axis=0, keepdims=True)
+    std = np.where(std == 0, 1, std)
+    return (x - mean) / std
+
 class ABIDE(torch.utils.data.Dataset):
     def __init__(self, config, index):
         super().__init__()
@@ -43,14 +50,13 @@ class ADHD200(torch.utils.data.Dataset):
         self.root = config["data_root"]
         feat, ts, label = (np.load(self.root + "final_matrix.npy"), np.load(self.root+"final_ts.npy"),
                                 np.load(self.root+"final_label.npy"))
+        label[label>1] = 1
         adj = get_network(ts, "partial correlation")
-        label[label>1]=1
+        selected_index = np.load(self.root+"selected_index.npy")
+        feat, ts, label, adj = feat[selected_index], ts[selected_index], label[selected_index], adj[selected_index]
         feat, ts, label, adj = feat[split], ts[split].transpose(0,2,1), label[split], adj[split]
-        site_list = np.load(self.root+"site_list.npy")[split]
-
-        index = (site_list == site) if site is not None else (np.ones_like(label)).astype(bool)
         data = (ts, label, feat, adj)
-        data = map(lambda x: torch.from_numpy(x[index]).to(config["device"]), data)
+        data = map(lambda x: torch.from_numpy(x).to(config["device"]), data)
         self.time_series, self.label, self.feature_matrix, self.adjacency = data
 
     def __len__(self):

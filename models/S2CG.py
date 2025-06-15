@@ -31,6 +31,7 @@ class S2CG(nn.Module):
     def forward(self, ts):
         b, n, t = ts.shape
         x_f = torch.fft.rfft(ts, dim=-1)
+        # for abide don't remove it
         x_f[:, :, 0] = 0
         f_t = torch.abs(x_f)
         mask = torch.zeros_like(x_f, dtype=torch.bool)
