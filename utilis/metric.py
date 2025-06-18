@@ -71,7 +71,7 @@ def cal_pco_ci(matrix, labels, K=8):
 
 
 
-def cal_small_world_coefficient(adj_matrix, n_random=20, seed=None):
+def cal_small_world_coefficient(A, normalize=True):
     """
     Calculate the small-world coefficient (σ) of a graph given its adjacency matrix.
 
@@ -87,24 +87,14 @@ def cal_small_world_coefficient(adj_matrix, n_random=20, seed=None):
     - C_rand: Average clustering coefficient of random graphs
     - L_rand: Average shortest path length of random graphs
     """
-    # Create the graph from the adjacency matrix
-    # threshold = np.percentile(adj_matrix[adj_matrix>0], 90)
-
-    # adj_matrix = (adj_matrix>=threshold).astype(int)
-    # adj_matrix[adj_matrix < 0] = 0
-    adj_matrix = (adj_matrix - np.min(adj_matrix)) / (np.max(adj_matrix) - np.min(adj_matrix))
-
-    # adj_matrix = (adj_matrix - np.mean(adj_matrix))/np.std(adj_matrix)
-    # adj_matrix[adj_matrix < 0] = 0
-
-    G = nx.from_numpy_array(adj_matrix)
-
-    # Calculate C and L for the input graph
+    A = (A - A.min()) / (A.max() - A.min())
+    G = nx.from_numpy_array(A)
     C = nx.average_clustering(G, weight='weight')
-
-
-    G = nx.from_numpy_array(np.max(adj_matrix) - adj_matrix)
+    A = A.max() - A
+    # A = (A - A.min()) / (A.max() - A.min())
+    G = nx.from_numpy_array(A)
     L = nx.average_shortest_path_length(G, weight='weight')
+
 
     return C, L
 

@@ -12,7 +12,7 @@
     "precision": 4,
     "length": 100,
     "loss": "sum",
-    "clustering_threshold": 0.5,
+    "clustering_threshold": 0,
     "seed": 2025,
     "size": 1009,
 
@@ -22,7 +22,7 @@
       "threshold": 0,
       "lr": 1e-4,
       "save_results": 0,
-      "epoch": 200,
+      "epoch": 50,
       "reg_loss": 2000,
       "rql_loss": 50,
       "batch_size": 64
@@ -85,7 +85,7 @@
     "name": "adhd",
     "atlas": "aal116",
     "N": 116,
-    "K":4,
+    "K":8,
     "num_folds": 5,
     "length": 70,
     "loss": "sum",
@@ -105,7 +105,7 @@
       "save_results": 0,
       "epoch": 200,
       "reg_loss": 2000,
-      "rql_loss": 0.1,
+      "rql_loss": 5,
       "batch_size": 64
     },
     "model": {

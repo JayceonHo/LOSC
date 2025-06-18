@@ -68,21 +68,22 @@ class TrainS2CG:
         else:
             draw_cluster(clustering_label, gt_label, config["N"], config["K"])
         print(f"fco {fco}, ci {ci}, purity {p_sco} , nmi: {nmi}, homo: {homogeneity}")
-
-        swe = cal_small_world_coefficient(sim_mat.mean(0))
-        swe_pc = cal_small_world_coefficient(train_dataset.feature_matrix.cpu().numpy().mean(0))
-        if args.dataset == "hcp":
-            swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy())
-        else:
-            swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy().mean(0))
-        print(f"our small-worldness {swe}, pc small-worldness {swe_pc}, pcc small-worldness {swe_pcc}")
+        # This part is used to compute two small-world metrics
+        # swe = cal_small_world_coefficient(sim_mat.mean(0))
+        # swe_pc = cal_small_world_coefficient(train_dataset.feature_matrix.cpu().numpy().mean(0))
+        # print(swe, swe_pc)
+        # if args.dataset == "hcp":
+        #     swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy(), True)
+        # else:
+        #     swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy().mean(0), True)
+        # print(f"our small-worldness {swe}, pc small-worldness {swe_pc}, pcc small-worldness {swe_pcc}")
+        # assert 1 == 2
 
 
 class TrainModel:
     def __init__(self):
         self.num_epoch = config["model"]["epoch"]
         cluster_label = np.load(f"./data/{args.dataset}/cluster.npy")
-        device = "cuda"
         self.model = ClassificationModel(config, cluster_label)
         # self.model = BrainNetworkTransformer(116, 116**2)
         # self.model = FBNETGEN(70, 116, 116, 16, 10).to(device)
@@ -138,13 +139,6 @@ class TrainModel:
         acc, auc, sens, spec = cal_metrics(pred, test_dataset.label)
         return acc, auc, sens, spec
 
-
-"""
-This is main file
-see configs for the set of basic parameters
-training-related hyper-parameters can be input in command line
-2025/06/12
-"""
 
 
 if __name__ == '__main__':
