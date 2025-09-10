@@ -33,6 +33,7 @@ class HCP(torch.utils.data.Dataset):
         ts = ts.squeeze(1).squeeze(-1)
         feat = get_network(ts)
         ts = ts.transpose(0,2,1)
+        assert 1==2, print(ts.shape)
         data = (ts, label, feat, adj)
         data = map(lambda x: torch.from_numpy(x).to(config["device"]), data)
         self.time_series, self.label, self.feature_matrix, self.adjacency = data

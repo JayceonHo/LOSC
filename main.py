@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import json
 import torch
+import time
 from tqdm import tqdm
 from torch_geometric.data import DataLoader
 from torch.utils.data import DataLoader
@@ -19,11 +20,13 @@ from baseline.models.BrainNetCNN import BrainNetCNN
 from baseline.models.gbt import GeometricBrainTransformer
 from baseline.models.RGTNet import GraphTransformer
 from baseline.models.PLSNet import PLSNet
-# from baseline.models.bnt import BrainNetworkTransformer
-# from baseline.models.newcomTF import ComBrainTF
+from baseline.models.bnt import BrainNetworkTransformer
+from baseline.models.newcomTF import ComBrainTF
 from baseline.models.MSSTAN import MSSTAN
 from baseline.models.dstanet import DSTANet
 from baseline.models.fbnetgen import FBNETGEN
+from thop import profile
+
 class TrainS2CG:
     def __init__(self):
         self.train_data_loader = DataLoader(train_dataset, batch_size=config["s2cg"]["batch_size"], shuffle=True)
@@ -85,15 +88,15 @@ class TrainModel:
         self.num_epoch = config["model"]["epoch"]
         cluster_label = np.load(f"./data/{args.dataset}/cluster.npy")
         self.model = ClassificationModel(config, cluster_label)
-        # self.model = BrainNetworkTransformer(116, 116**2)
-        # self.model = FBNETGEN(70, 116, 116, 16, 10).to(device)
-        # self.model = GraphTransformer(roi_num=116, node_feature_dim=116,time_series=70).to(device)
-        # self.model = PLSNet(roi_num=116, node_feature_dim=116,time_series=70).to(device)
-        # self.model = CNN().to(device)
-        # self.model = GeometricBrainTransformer(node_sz=116,nhead=4, all_dim=116**2).to(device)
-        # self.model = DSTANet(num_class=2, num_frame=116, num_point=116)
-        # self.model = MSSTAN(node_num=116, graph_num=config["model"]["batch_size"]).to("cuda")
-        # self.model = BrainNetCNN(116)
+        # self.model = BrainNetworkTransformer(config["N"], config["N"]**2)
+        # self.model = FBNETGEN(config["length"], config["N"], config["N"], 16, 10)
+        # self.model = GraphTransformer(roi_num=config["N"], node_feature_dim=config["N"],time_series=config["length"])
+        # self.model = PLSNet(roi_num=config["N"], node_feature_dim=config["N"],time_series=config["length"])
+        # self.model = CNN()
+        # self.model = GeometricBrainTransformer(node_sz=config["N"],nhead=4, all_dim=config["N"]**2)
+        # self.model = DSTANet(num_class=2, num_frame=config["N"], num_point=config["N"])
+        # self.model = MSSTAN(node_num=config["N"], graph_num=config["model"]["batch_size"])
+        # self.model = BrainNetCNN(config["N"])
         self.model.to(args.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=config["model"]["lr"])
         self.train_data_loader = DataLoader(train_dataset, batch_size=config["model"]["batch_size"], shuffle=True)
@@ -112,9 +115,16 @@ class TrainModel:
             train_correct = 0
             self.model.train()
             for idx, data in enumerate(self.train_data_loader):
+                start_time = time.time()
                 pred = self.model(data[0], data[1], data[-1])[0]
+
                 # pred = self.model(data[0], data[0])
-                # pred = self.model(data[-1], data[0])
+                # pred = self.model(data[1], data[0])
+                end_time = time.time()
+                print("here: ", data[0].shape)
+                # flops, params = profile(self.model, [data[1], data[0]], verbose=False)
+                flops, params = profile(self.model, [data[0], data[1], data[-1]], verbose=False)
+                assert  1==2, print(f"Model FLOPs: {flops / 1e9:.2f} G, Params: {params / 1e6:.2f} M, runtime {end_time - start_time:.2f} s")
                 loss = config["model"]["loss"] * loss_func(pred, data[2])
                 train_correct += data[2].eq(torch.argmax(pred, dim=1)).sum().item()
                 loss.backward()
