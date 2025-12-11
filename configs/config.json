@@ -6,7 +6,7 @@
     "K": 8,
     "baseline": 0,
     "num_folds": 5,
-    "data_root": "/home/hjc/Codebase/Database/ABIDE/abide200/",
+    "data_root": "your_path",
     "device": "cuda",
     "N": 200,
     "precision": 4,
@@ -52,7 +52,7 @@
     "length": 1000,
     "loss": "sum",
     "device": "cuda",
-    "data_root": "/home/hjc/Codebase/Database/HCP/data/",
+    "data_root": "your_path",
     "clustering_threshold": 0.5,
 
     "s2cg": {
@@ -90,7 +90,7 @@
     "length": 70,
     "loss": "sum",
     "device": "cuda",
-    "data_root": "/home/hjc/Codebase/Database/code/preprocessed_adhd/",
+    "data_root": "your_path",
     "clustering_threshold": 0,
     "size": 937,
     "s2cg": {

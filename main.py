@@ -13,18 +13,8 @@ from torch.utils.tensorboard import SummaryWriter
 from sklearn.cluster import SpectralClustering
 from utilis.loss import batch_rayleigh_quotient_loss
 from utilis.dataset import ABIDE, HCP, ADHD200
-from utilis.metric import cal_metrics, evaluate_cluster_performance, cal_small_world_coefficient
 from utilis.tools import *
 from utilis.plot import draw_cluster, draw_adhd_cluster
-from baseline.models.BrainNetCNN import BrainNetCNN
-from baseline.models.gbt import GeometricBrainTransformer
-from baseline.models.RGTNet import GraphTransformer
-from baseline.models.PLSNet import PLSNet
-from baseline.models.bnt import BrainNetworkTransformer
-from baseline.models.newcomTF import ComBrainTF
-from baseline.models.MSSTAN import MSSTAN
-from baseline.models.dstanet import DSTANet
-from baseline.models.fbnetgen import FBNETGEN
 from thop import profile
 
 class TrainS2CG:
@@ -71,16 +61,6 @@ class TrainS2CG:
         else:
             draw_cluster(clustering_label, gt_label, config["N"], config["K"])
         print(f"fco {fco}, ci {ci}, purity {p_sco} , nmi: {nmi}, homo: {homogeneity}")
-        # This part is used to compute two small-world metrics
-        # swe = cal_small_world_coefficient(sim_mat.mean(0))
-        # swe_pc = cal_small_world_coefficient(train_dataset.feature_matrix.cpu().numpy().mean(0))
-        # print(swe, swe_pc)
-        # if args.dataset == "hcp":
-        #     swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy(), True)
-        # else:
-        #     swe_pcc = cal_small_world_coefficient(train_dataset.adjacency.cpu().numpy().mean(0), True)
-        # print(f"our small-worldness {swe}, pc small-worldness {swe_pc}, pcc small-worldness {swe_pcc}")
-        # assert 1 == 2
 
 
 class TrainModel:
@@ -88,15 +68,6 @@ class TrainModel:
         self.num_epoch = config["model"]["epoch"]
         cluster_label = np.load(f"./data/{args.dataset}/cluster.npy")
         self.model = ClassificationModel(config, cluster_label)
-        # self.model = BrainNetworkTransformer(config["N"], config["N"]**2)
-        # self.model = FBNETGEN(config["length"], config["N"], config["N"], 16, 10)
-        # self.model = GraphTransformer(roi_num=config["N"], node_feature_dim=config["N"],time_series=config["length"])
-        # self.model = PLSNet(roi_num=config["N"], node_feature_dim=config["N"],time_series=config["length"])
-        # self.model = CNN()
-        # self.model = GeometricBrainTransformer(node_sz=config["N"],nhead=4, all_dim=config["N"]**2)
-        # self.model = DSTANet(num_class=2, num_frame=config["N"], num_point=config["N"])
-        # self.model = MSSTAN(node_num=config["N"], graph_num=config["model"]["batch_size"])
-        # self.model = BrainNetCNN(config["N"])
         self.model.to(args.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=config["model"]["lr"])
         self.train_data_loader = DataLoader(train_dataset, batch_size=config["model"]["batch_size"], shuffle=True)
@@ -115,16 +86,7 @@ class TrainModel:
             train_correct = 0
             self.model.train()
             for idx, data in enumerate(self.train_data_loader):
-                start_time = time.time()
                 pred = self.model(data[0], data[1], data[-1])[0]
-
-                # pred = self.model(data[0], data[0])
-                # pred = self.model(data[1], data[0])
-                end_time = time.time()
-                print("here: ", data[0].shape)
-                # flops, params = profile(self.model, [data[1], data[0]], verbose=False)
-                flops, params = profile(self.model, [data[0], data[1], data[-1]], verbose=False)
-                assert  1==2, print(f"Model FLOPs: {flops / 1e9:.2f} G, Params: {params / 1e6:.2f} M, runtime {end_time - start_time:.2f} s")
                 loss = config["model"]["loss"] * loss_func(pred, data[2])
                 train_correct += data[2].eq(torch.argmax(pred, dim=1)).sum().item()
                 loss.backward()
@@ -140,9 +102,6 @@ class TrainModel:
         rois_weights, cluster_weights = None, None
         with torch.no_grad():
             pred, rois_weights, cluster_weights =  self.model(test_dataset.feature_matrix.float(), test_dataset.time_series.float())
-            # pred = self.model(test_dataset.time_series.float(), test_dataset.feature_matrix.float())
-            # pred = self.model(test_dataset.feature_matrix.float(), test_dataset.feature_matrix.float())
-
         if args.save_result:
             np.save(f"./data/{args.dataset}/{f}_roi_weights.npy", rois_weights)
             np.save(f"./data/{args.dataset}/{f}_cluster_weights.npy", cluster_weights)
